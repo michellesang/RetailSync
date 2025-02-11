@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Products</h1>
+    <table id="products-table">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Category</th>
+          <th>Brand</th>
+          <th>Add to Cart</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{ product.ProductName }}</td>
+          <td>{{ product.ProdDescription }}</td>
+          <td>${{ product.Price }}</td>
+          <td>{{ product.Category }}</td>
+          <td>{{ product.Brand }}</td>
+          <td>
+            <button
+              onclick="addToCart('{{ product.ProductName }}', {{ product.Price }})"
+            >
+              Add to Cart
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <script>
+      function addToCart(productName, price, quantity) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+        const existingItem = cart.find(
+          (item) => item.productName === productName
+        );
+        if (existingItem) {
+          existingItem.quantity += quantity; // Increase quantity if already in cart
+        } else {
+          cart.push({ productName, price, quantity });
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart(); // Reload the cart to show the updated items
+      }
+    </script>
+  </body>
+</html>

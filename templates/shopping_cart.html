@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="page-header">
+      <h1>Shopping Cart</h1>
+    </div>
+
+    <div class="container">
+      <div class="cart-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Total Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="cart-items">
+            <!-- Cart items will be dynamically added here -->
+          </tbody>
+        </table>
+        <div id="cart-summary" class="cart-summary">
+          <!-- Total will be added here -->
+        </div>
+        <button
+          class="checkout-btn"
+          onclick="goToCheckout()"
+          class="checkout-btn"
+        >
+          Checkout
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function loadCart() {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const cartItemsContainer = document.getElementById("cart-items");
+        const cartSummary = document.getElementById("cart-summary");
+        cartItemsContainer.innerHTML = "";
+
+        if (cart.length === 0) {
+          cartItemsContainer.innerHTML = `
+            <tr>
+              <td colspan="5" class="empty-cart">Your cart is empty</td>
+            </tr>`;
+          cartSummary.innerHTML = "";
+          return;
+        }
+
+        let totalAmount = 0;
+
+        cart.forEach((item, index) => {
+          const totalPrice = item.price * item.quantity;
+          totalAmount += totalPrice;
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.productName}</td>
+            <td>
+              <input type="number" value="${item.quantity}" min="1" 
+                onchange="updateQuantity(${index}, this.value)">
+            </td>
+            <td>$${item.price.toFixed(2)}</td>
+            <td>$${totalPrice.toFixed(2)}</td>
+            <td>
+              <button class="remove-btn" onclick="removeFromCart(${index})">
+                Remove
+              </button>
+            </td>
+          `;
+          cartItemsContainer.appendChild(row);
+        });
+
+        cartSummary.innerHTML = `
+          <div>
+            <strong>Total Amount: $${totalAmount.toFixed(2)}</strong>
+          </div>
+        `;
+      }
+
+      // Update quantity in the cart
+      function updateQuantity(index, newQuantity) {
+        let cart = JSON.parse(localStorage.getItem("cart"));
+        cart[index].quantity = parseInt(newQuantity);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart(); // Refresh the cart view
+      }
+
+      // Remove an item from the cart
+      function removeFromCart(index) {
+        let cart = JSON.parse(localStorage.getItem("cart"));
+        cart.splice(index, 1); // Remove item at index
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart(); // Refresh the cart view
+      }
+
+      // Navigate to checkout page
+      function goToCheckout() {
+        window.location.href = "{{ url_for('checkout') }}"; // Redirect to checkout page
+      }
+
+      // Load cart when page is ready
+      window.onload = loadCart;
+    </script>
+  </body>
+</html>
